@@ -1,0 +1,29 @@
+projectName: archetype
+basePackage: com.m2r.archetype
+configDir: ${user.dir}/scaffolding
+outputDir: ${user.dir}
+templates:
+- name: Model
+  scope: class
+  fileName: template-model.vm
+  outputFileName: src/main/java/${context.basePackage.toPath()}/domain/${domain.name}.java
+- name: Enum
+  scope: enum
+  fileName: template-enum.vm
+  outputFileName: src/main/java/${context.basePackage.toPath()}/enums/${domain.name}.java
+- name: DTO
+  scope: class
+  fileName: template-dto.vm
+  outputFileName: src/main/java/${context.basePackage.toPath()}/dto/${domain.name}DTO.java
+- name: Mapper
+  scope: class
+  fileName: template-mapper.vm
+  outputFileName: src/main/java/${context.basePackage.toPath()}/mapper/${domain.name}Mapper.java
+- name: Repo
+  scope: class
+  fileName: template-repo.vm
+  outputFileName: src/main/java/${context.basePackage.toPath()}/repository/${domain.name}Repository.java
+- name: Resource
+  scope: class
+  fileName: template-resource.vm
+  outputFileName: src/main/java/${context.basePackage.toPath()}/web/rest/${domain.name}Resource.java

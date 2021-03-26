@@ -1,0 +1,121 @@
+package ${context.basePackage}.domain;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.time.*;
+import java.util.*;
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isEnum() )
+import ${context.basePackage}.enums.${attribute.type};
+#end
+#end
+
+@Entity
+@Table(name = "${domain.name.toSnakeUpperCase()}")
+public class ${domain.name} extends AbstractDomain {
+
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+#foreach( $attribute in $domain.attributes )
+#set( $length=", length=$attribute.length" )
+#set( $complement="${attribute.ifRequired(', nullable=true', ', nullable=false')}${attribute.ifLength($length, '')}" )
+#if( $attribute.isBooleanInput() )
+    @Column(name = "${attribute.name.toSnakeUpperCase()}"$complement)
+    private Boolean ${attribute.name.toCamelCase()};
+#elseif( $attribute.isInteger() )
+    @Column(name = "${attribute.name.toSnakeUpperCase()}"$complement)
+    private Integer ${attribute.name.toCamelCase()};
+#elseif( $attribute.isLong() )
+    @Column(name = "${attribute.name.toSnakeUpperCase()}"$complement)
+    private Long ${attribute.name.toCamelCase()};
+#elseif( $attribute.isDouble() )
+    @Column(name = "${attribute.name.toSnakeUpperCase()}"$complement)
+    private Double ${attribute.name.toCamelCase()};
+#elseif( $attribute.isFloat() )
+    @Column(name = "${attribute.name.toSnakeUpperCase()}"$complement)
+    private Float ${attribute.name.toCamelCase()};
+#elseif( $attribute.isBigDecimal() )
+    @Column(name = "${attribute.name.toSnakeUpperCase()}"$complement)
+    private BigDecimal ${attribute.name.toCamelCase()};
+#elseif( $attribute.isLocalDate() )
+    @Column(name = "${attribute.name.toSnakeUpperCase()}"$complement)
+    private LocalDate ${attribute.name.toCamelCase()};
+#elseif( $attribute.isLocalDateTime() )
+    @Column(name = "${attribute.name.toSnakeUpperCase()}"$complement)
+    private LocalDateTime ${attribute.name.toCamelCase()};
+#elseif( $attribute.isEnum() )
+    @Enumerated(EnumType.STRING)
+    @Column(name = "${attribute.name.toSnakeUpperCase()}"$complement)
+    private ${attribute.typeDomain.name} ${attribute.name.toCamelCase()};
+#elseif( $attribute.isModel())
+    @OneToOne
+    private ${attribute.typeDomain.name} ${attribute.name.toCamelCase()};
+#elseif ( $attribute.isList() )
+#if( $attribute.isManyToMany() && $attribute.isMain() )
+    @ManyToMany
+    @JoinTable(name = "${domain.name.toSnakeUpperCase()}_${attribute.typeDomain.name.toSnakeUpperCase()}",
+               joinColumns = @JoinColumn(name = "${domain.name.toSnakeUpperCase()}_ID", referencedColumnName = "ID"),
+               inverseJoinColumns = @JoinColumn(name = "${attribute.typeDomain.name.toSnakeUpperCase()}_ID", referencedColumnName = "ID"))
+    private List<${attribute.typeDomain.name}> ${attribute.name.toCamelCase()} = new ArrayList<>();
+#elseif( $attribute.isManyToMany() && !$attribute.isMain())
+    @ManyToMany(mappedBy = "${attribute.mappedBy}")
+    private List<${attribute.typeDomain.name}> ${attribute.name.toCamelCase()} = new ArrayList<>();
+#elseif( $attribute.isManyToOne() )
+    @ManyToOne()
+    private List<${attribute.typeDomain.name}> ${attribute.name.toCamelCase()} = new ArrayList<>();
+#else
+    @OneToMany()
+    private List<${attribute.typeDomain.name}> ${attribute.name.toCamelCase()} = new ArrayList<>();
+#end
+#else
+    @Column(name = "${attribute.name.toSnakeUpperCase()}"$complement)
+    private String ${attribute.name.toCamelCase()};
+#end
+
+#end
+	@Override
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+#foreach( $attribute in $domain.attributes )
+    public ${attribute.type} get${attribute.name.toPascalCase()}() {
+        return ${attribute.name.toCamelCase()};
+    }
+
+    public void set${attribute.name.toPascalCase()}(${attribute.type} ${attribute.name.toCamelCase()}) {
+        this.${attribute.name.toCamelCase()} = ${attribute.name.toCamelCase()};
+    }
+
+#end
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ${domain.name})) {
+            return false;
+        }
+        return id != null && id.equals(((${domain.name}) o).id);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31;
+    }
+
+    @Override
+    public String toString() {
+        return "Cliente{" +
+            "id=" + getId() +
+            ", ${domain.attrTitle}='" + get${domain.attrTitle.toPascalCase()}() + "'}";
+    }
+}

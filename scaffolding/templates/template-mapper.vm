@@ -1,0 +1,62 @@
+package ${context.basePackage}.mapper;
+
+import ${context.basePackage}.domain.${domain.name};
+import ${context.basePackage}.dto.${domain.name}DTO;
+#foreach( $attribute in $domain.attributes )
+#if( ${attribute.isEnum()} )
+import ${context.basePackage}.enums.${attribute.typeDomain.name};
+#end
+#end
+
+public class  ${domain.name}Mapper extends BaseMapper<${domain.name}DTO, ${domain.name}> {
+
+	public static final ${domain.name}Mapper INSTANCE = new ${domain.name}Mapper();
+
+	public ${domain.name} toEntity(${domain.name}DTO dto) {
+		return toEntity(dto, null, null);
+	}
+
+	public ${domain.name} toEntity(${domain.name}DTO dto, ${domain.name} entity, Object parent) {
+		if (dto == null) return null;
+		if (entity == null) entity = new ${domain.name}();
+		entity.setId(dto.getId());
+#if( $domain.hasCompositionOwner() )
+		//entity.set${domain.compositionOwner.name}((${domain.compositionOwner.name}) parent);
+#end
+#foreach( $attribute in $domain.attributes )
+#if( ${attribute.isEnum()} )
+		entity.set${attribute.name.toPascalCase()}(stringToEnum(dto.get${attribute.name.toPascalCase()}(), ${attribute.typeDomain.name}.class));
+#elseif( ${attribute.isList()} )
+		entity.set${attribute.name.toPascalCase()}(dtoListToEntityList(dto.get${attribute.name.toPascalCase()}(), entity.get${attribute.name.toPascalCase()}(), ${attribute.typeDomain.name}Mapper.INSTANCE, entity));
+#elseif( ${attribute.isModel()} )
+		entity.set${attribute.name.toPascalCase()}(${attribute.typeDomain.name}Mapper.INSTANCE.toEntity(dto.get${attribute.name.toPascalCase()}(), entity.get${attribute.name.toPascalCase()}(), entity));
+#else
+		entity.set${attribute.name.toPascalCase()}(dto.get${attribute.name.toPascalCase()}());
+#end
+#end
+		return entity;
+	}
+
+	public ${domain.name}DTO toDTO(${domain.name} entity) {
+		return this.toDTO(entity, new ${domain.name}DTO());
+	}
+
+	public ${domain.name}DTO toDTO(${domain.name} entity, ${domain.name}DTO dto) {
+		if (entity == null) return null;
+		if (dto == null) dto = new ${domain.name}DTO();
+		dto.setId(entity.getId());
+#foreach( $attribute in $domain.attributes )
+#if( ${attribute.isEnum()} )
+		dto.set${attribute.name.toPascalCase()}(enumToString(entity.get${attribute.name.toPascalCase()}()));
+#elseif( ${attribute.isList()} )
+		dto.set${attribute.name.toPascalCase()}(entityListToDTOList(entity.get${attribute.name.toPascalCase()}(), dto.get${attribute.name.toPascalCase()}(), ${attribute.typeDomain.name}Mapper.INSTANCE));
+#elseif( ${attribute.isModel()} )
+		dto.set${attribute.name.toPascalCase()}(${attribute.typeDomain.name}Mapper.INSTANCE.toDTO(entity.get${attribute.name.toPascalCase()}(), dto.get${attribute.name.toPascalCase()}()));
+#else
+		dto.set${attribute.name.toPascalCase()}(entity.get${attribute.name.toPascalCase()}());
+#end
+#end
+		return dto;
+	}
+
+}

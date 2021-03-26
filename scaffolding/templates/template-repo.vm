@@ -1,0 +1,10 @@
+package ${context.basePackage}.repository;
+
+import ${context.basePackage}.domain.${domain.name};
+import org.springframework.data.jpa.repository.*;
+import org.springframework.stereotype.Repository;
+
+@SuppressWarnings("unused")
+@Repository
+public interface ${domain.name}Repository extends JpaRepository<${domain.name}, Long> {
+}

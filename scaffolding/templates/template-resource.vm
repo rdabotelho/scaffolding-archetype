@@ -1,0 +1,81 @@
+package ${context.basePackage}.web.rest;
+
+import ${context.basePackage}.domain.${domain.name};
+import ${context.basePackage}.repository.${domain.name}Repository;
+import ${context.basePackage}.dto.${domain.name}DTO;
+import ${context.basePackage}.mapper.${domain.name}Mapper;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api")
+@Transactional
+public class ${domain.name}Resource {
+
+    private final Logger log = LoggerFactory.getLogger(${domain.name}Resource.class);
+
+    private final ${domain.name}Repository ${domain.name.toCamelCase()}Repository;
+
+    public ${domain.name}Resource(${domain.name}Repository ${domain.name.toCamelCase()}Repository) {
+        this.${domain.name.toCamelCase()}Repository = ${domain.name.toCamelCase()}Repository;
+    }
+
+    @PostMapping("/${domain.name.toCamelCase()}s")
+    public ResponseEntity<${domain.name}DTO> create${domain.name}(@RequestBody ${domain.name}DTO ${domain.name.toCamelCase()}) throws Exception {
+        log.debug("REST request to save ${domain.name} : {}", ${domain.name.toCamelCase()});
+        if (${domain.name.toCamelCase()}.getId() != null) {
+            throw new RuntimeException("A new ${domain.name} cannot already have an ID");
+        }
+        ${domain.name} result = ${domain.name.toCamelCase()}Repository.save(${domain.name}Mapper.INSTANCE.toEntity(${domain.name.toCamelCase()}));
+        return ResponseEntity
+                .created(new URI("/api/${domain.name.toCamelCase()}s/" + result.getId()))
+                .body(${domain.name}Mapper.INSTANCE.toDTO(result));
+    }
+
+    @PutMapping("/${domain.name.toCamelCase()}s")
+    public ResponseEntity<${domain.name}DTO> update${domain.name}(@RequestBody ${domain.name}DTO ${domain.name.toCamelCase()}) {
+        log.debug("REST request to update ${domain.name} : {}", ${domain.name.toCamelCase()});
+        if (${domain.name.toCamelCase()}.getId() == null) {
+            throw new RuntimeException("Invalid id");
+        }
+        return ${domain.name.toCamelCase()}Repository.findById(${domain.name.toCamelCase()}.getId())
+                .map(it -> {
+                    ${domain.name} result = ${domain.name.toCamelCase()}Repository.save(${domain.name}Mapper.INSTANCE.toEntity(${domain.name.toCamelCase()}));
+                    return ResponseEntity.ok().body(${domain.name}Mapper.INSTANCE.toDTO(result));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/${domain.name.toCamelCase()}s")
+    public List<${domain.name}DTO> getAll${domain.name}s() {
+        log.debug("REST request to get all ${domain.name}s");
+        return ${domain.name.toCamelCase()}Repository.findAll()
+                .stream()
+                .map(it -> ${domain.name}Mapper.INSTANCE.toDTO(it))
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/${domain.name.toCamelCase()}s/{id}")
+    public ResponseEntity<${domain.name}DTO> get${domain.name}(@PathVariable Long id) {
+        log.debug("REST request to get ${domain.name} : {}", id);
+        return ${domain.name.toCamelCase()}Repository.findById(id)
+                .map(it -> ResponseEntity.ok().body(${domain.name}Mapper.INSTANCE.toDTO(it)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/${domain.name.toCamelCase()}s/{id}")
+    public ResponseEntity<Void> delete${domain.name}(@PathVariable Long id) {
+        log.debug("REST request to delete ${domain.name} : {}", id);
+        ${domain.name.toCamelCase()}Repository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+    
+}

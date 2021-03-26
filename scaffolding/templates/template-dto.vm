@@ -1,0 +1,78 @@
+package ${context.basePackage}.dto;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.Serializable;
+import java.time.*;
+import java.util.*;
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isEnum() )
+import ${context.basePackage}.enums.${attribute.type};
+#end
+#end
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class ${domain.name}DTO extends BaseDTO {
+
+    private static final long serialVersionUID = 1L;
+
+    private Long id;
+
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isModel())
+    private ${attribute.typeDomain.name}DTO ${attribute.name.toCamelCase()};
+#elseif ( $attribute.isList() )
+    private List<${attribute.typeDomain.name}DTO> ${attribute.name.toCamelCase()} = new ArrayList<>();
+#elseif ( $attribute.isEnum() )
+    private String ${attribute.name.toCamelCase()};
+#else
+    private ${attribute.type} ${attribute.name.toCamelCase()};
+#end
+#end
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isModel())
+    public ${attribute.type}DTO get${attribute.name.toPascalCase()}() {
+        return ${attribute.name.toCamelCase()};
+    }
+
+    public void set${attribute.name.toPascalCase()}(${attribute.type}DTO ${attribute.name.toCamelCase()}) {
+        this.${attribute.name.toCamelCase()} = ${attribute.name.toCamelCase()};
+    }
+
+#elseif ( $attribute.isList() )
+    public List<${attribute.typeDomain.name}DTO> get${attribute.name.toPascalCase()}() {
+        return ${attribute.name.toCamelCase()};
+    }
+
+    public void set${attribute.name.toPascalCase()}(List<${attribute.typeDomain.name}DTO> ${attribute.name.toCamelCase()}) {
+        this.${attribute.name.toCamelCase()} = ${attribute.name.toCamelCase()};
+    }
+#elseif ( $attribute.isEnum() )
+    public String get${attribute.name.toPascalCase()}() {
+        return ${attribute.name.toCamelCase()};
+    }
+
+    public void set${attribute.name.toPascalCase()}(String ${attribute.name.toCamelCase()}) {
+        this.${attribute.name.toCamelCase()} = ${attribute.name.toCamelCase()};
+    }
+
+#else
+    public ${attribute.type} get${attribute.name.toPascalCase()}() {
+        return ${attribute.name.toCamelCase()};
+    }
+
+    public void set${attribute.name.toPascalCase()}(${attribute.type} ${attribute.name.toCamelCase()}) {
+        this.${attribute.name.toCamelCase()} = ${attribute.name.toCamelCase()};
+    }
+
+#end
+#end
+}
