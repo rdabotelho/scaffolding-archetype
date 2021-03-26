@@ -1,0 +1,13 @@
+projectName: quickstart
+basePackage: com.m2r.archetype
+configDir: /${user.dir}/scaffolding
+outputDir: /${user.dir}/src/main/java/com/m2r/archetype
+templates:
+- name: Model
+  scope: class
+  fileName: template-class.vm
+  outputFileName: src/main/java/${context.basePackage.toPath()}/domain/${domain.name}.java
+- name: Enum
+  scope: enum
+  fileName: template-enum.vm
+  outputFileName: src/main/java/${context.basePackage.toPath()}/enums/${domain.name}.java
