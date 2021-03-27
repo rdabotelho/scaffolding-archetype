@@ -1,6 +1,6 @@
 package ${context.basePackage}.domain;
 
-public abstract class AbstractModel {
+public abstract class AbstractDomain {
 
     public abstract Long getId();
 
