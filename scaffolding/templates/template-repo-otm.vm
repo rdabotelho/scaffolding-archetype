@@ -1,0 +1,59 @@
+#set( $domain1 = $domain.attributes[0] )
+#set( $domain2 = $domain.attributes[1] )
+import 'package:${context.projectName.toLowerCase()}/repositories/base_repo.dart';
+import 'package:${context.projectName.toLowerCase()}/models/${domain.name.toSnakeLowerCase()}.dart';
+import 'package:${context.projectName.toLowerCase()}/models/${domain1.type.toSnakeLowerCase()}.dart';
+import 'package:${context.projectName.toLowerCase()}/models/${domain2.type.toSnakeLowerCase()}.dart';
+
+class ${domain.name}Repository extends BaseRepository {
+
+    static Future<List<$domain2.type>> findAll${domain2.type}By${domain1.type}(int id${domain1.type}) {
+        if (id${domain1.type} == null) return Future.value([]);
+        return createDatabase().then((db) {
+            return db.rawQuery('select q.* from ${domain2.type.toSnakeLowerCase()} q '
+                'join ${domain.name.toSnakeLowerCase()} qq on (qq.id_${domain2.type.toSnakeLowerCase()} = q.id) '
+                'where qq.id_${domain1.type.toSnakeLowerCase()} = ?', [id${domain1.type}]).then((maps) {
+                final List<$domain2.type> models = List();
+                for (Map<String, dynamic> map in maps) {
+                    models.add(${domain2.type}.toModel(map));
+                }
+                return models;
+            });
+        });
+    }
+
+    static Future<List<$domain1.type>> findAll${domain1.type}By${domain2.type}(int id${domain2.type}) {
+        if (id${domain2.type} == null) return Future.value([]);
+        return createDatabase().then((db) {
+            return db.rawQuery('select q.* from ${domain1.type.toSnakeLowerCase()} q '
+                'join ${domain.name.toSnakeLowerCase()} qq on (qq.id_${domain1.type.toSnakeLowerCase()} = q.id) '
+                'where qq.id_${domain2.type.toSnakeLowerCase()} = ?', [id${domain2.type}]).then((maps) {
+                final List<$domain1.type> models = List();
+                for (Map<String, dynamic> map in maps) {
+                    models.add(${domain1.type}.toModel(map));
+                }
+                return models;
+            });
+        });
+    }
+
+    static Future<int> save($domain.name model) {
+        return createDatabase().then((db) {
+            final Map<String, dynamic> map = ${domain.name}.toMap(model);
+            return db.insert('${domain.name.toSnakeLowerCase()}', map);
+        });
+    }
+
+    static Future<int> deleteAllBy${domain1.type}(int id${domain1.type}) {
+        return createDatabase().then((db) {
+            return db.delete('${domain.name.toSnakeLowerCase()}', where: 'id_${domain1.type.toSnakeLowerCase()} = ?', whereArgs: [id${domain1.type}]);
+        });
+    }
+
+    static Future<int> deleteAllBy${domain2.type}(int id${domain2.type}) {
+        return createDatabase().then((db) {
+            return db.delete('${domain.name.toSnakeLowerCase()}', where: 'id_${domain2.type.toSnakeLowerCase()} = ?', whereArgs: [id${domain2.type}]);
+        });
+    }
+
+}

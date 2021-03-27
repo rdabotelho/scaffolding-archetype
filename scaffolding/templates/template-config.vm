@@ -1,0 +1,65 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
+#foreach( $domain in $context.domains )
+#if( $domain.type != 'enum' )
+import 'package:${context.projectName.toLowerCase()}/models/${domain.name.toSnakeLowerCase()}.dart';
+#if ( $domain.type == 'class' && !$domain.hasCompositionOwner() )
+import 'package:${context.projectName.toLowerCase()}/views/${domain.name.toSnakeLowerCase()}/${domain.name.toSnakeLowerCase()}_list.dart';
+#end
+#end
+#end
+
+void execInitialScripts(Database db) {
+#foreach( $domain in $context.domains )
+#if( $domain.type != 'enum' )
+  db.execute(${domain.name}.createScript());
+#end
+#end
+  db.execute("INSERT INTO cidade(nome,uf) VALUES('BELEM','PA')");
+  db.execute("INSERT INTO cidade(nome,uf) VALUES('CASTANHAL','PA')");
+  db.execute("INSERT INTO cidade(nome,uf) VALUES('ANANINDEUA','PA')");
+  db.execute("INSERT INTO cidade(nome,uf) VALUES('SAO PAULO','SP')");
+  db.execute("INSERT INTO cidade(nome,uf) VALUES('CAMPINAS','SP')");
+  db.execute("INSERT INTO cidade(nome,uf) VALUES('BARUERI','SP')");
+  db.execute("INSERT INTO cidade(nome,uf) VALUES('FORTALEZA','CE')");
+  db.execute("INSERT INTO cidade(nome,uf) VALUES('BRASILIA','DF')");
+  db.execute("INSERT INTO cidade(nome,uf) VALUES('CURITIBA','PA')");
+  db.execute("INSERT INTO grupo(nome,descricao) VALUES('GRUPO A','Grupo de Acesso A')");
+  db.execute("INSERT INTO grupo(nome,descricao) VALUES('GRUPO B','Grupo de Acesso B')");
+  db.execute("INSERT INTO grupo(nome,descricao) VALUES('GRUPO C','Grupo de Acesso C')");
+  db.execute("INSERT INTO grupo(nome,descricao) VALUES('GRUPO D','Grupo de Acesso D')");
+  db.execute("INSERT INTO grupo(nome,descricao) VALUES('GRUPO E','Grupo de Acesso E')");
+}
+
+List<Widget> getMenu(BuildContext context) {
+    return [
+#foreach( $domain in $context.domains )
+#if( $domain.type == 'class' && !$domain.hasCompositionOwner() )
+        Material(
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (context) => ${domain.name}List()
+                  )
+              );
+            },
+            child: Card(
+              child: ListTile(
+                title: Text(
+                    '$domain.getParam("label")',
+                    style: TextStyle(fontSize: 24.0),
+                ),
+                subtitle: Text(
+                    'Cadastro de $domain.getParam("label")',
+                    style: TextStyle(fontSize: 16.0),
+                ),
+              ),
+            ),
+          ),
+        ),
+#end
+#end
+    ];
+}

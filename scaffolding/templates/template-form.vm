@@ -1,0 +1,247 @@
+import 'package:flutter/material.dart';
+import 'package:${context.projectName.toLowerCase()}/enums/base_enum.dart';
+import 'package:${context.projectName.toLowerCase()}/utils/app_utils.dart';
+import 'package:${context.projectName.toLowerCase()}/utils/inputs_utils.dart';
+import 'package:${context.projectName.toLowerCase()}/models/${domain.name.toSnakeLowerCase()}.dart';
+#foreach( $attribute in $domain.attributes )
+#if($attribute.isComposition())
+import 'package:${context.projectName.toLowerCase()}/views/${attribute.typeDomain.name.toSnakeLowerCase()}/${attribute.typeDomain.name.toSnakeLowerCase()}_form.dart';
+#end
+#if( $attribute.isEnum() )
+import 'package:${context.projectName.toLowerCase()}/enums/${attribute.typeDomain.name.toSnakeLowerCase()}.dart';
+#elseif( $attribute.hasTypeDomain() )
+import 'package:${context.projectName.toLowerCase()}/models/${attribute.typeDomain.name.toSnakeLowerCase()}.dart';
+import 'package:${context.projectName.toLowerCase()}/repositories/${attribute.typeDomain.name.toSnakeLowerCase()}_repo.dart';
+#end
+#end
+
+class ${domain.name}Form extends StatefulWidget {
+
+  final ${domain.name} _${domain.name.toCamelCase()};
+
+  ${domain.name}Form(this._${domain.name.toCamelCase()});
+
+  @override
+  _${domain.name}FormState createState() => _${domain.name}FormState(_${domain.name.toCamelCase()});
+
+}
+
+class _${domain.name}FormState extends State<${domain.name}Form> {
+
+  final ${domain.name} _${domain.name.toCamelCase()};
+  final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+#foreach( $attribute in $domain.attributes )
+#if( !$attribute.isEnum() && !$attribute.isList() && $attribute.hasTypeDomain() )
+    final ModelEditingController _${attribute.name.toCamelCase()}Controller = ModelEditingController(false);
+#elseif( !$attribute.isEnum() && $attribute.isList() && $attribute.hasTypeDomain() )
+    final ModelEditingController _${attribute.name.toCamelCase()}Controller = ModelEditingController(true);
+#else
+    final TextEditingController _${attribute.name.toCamelCase()}Controller = TextEditingController();
+#end
+#end
+
+  _${domain.name}FormState(this._${domain.name.toCamelCase()});
+
+  @override
+  void initState() {
+    super.initState();
+    this.updateController();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Novo ${domain.getParam("label")}')),
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: Form(
+          key: _formKey,
+          autovalidate: true,
+          child: ListView(
+            children: <Widget>[
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isIntegerInput() )
+              IntegerFormField(
+                setState,
+                context,
+                _${attribute.name.toCamelCase()}Controller,
+                InputDecoration(
+                  labelText: '${attribute.getParam("label")}',
+                ),
+                (value) => null,
+              ),
+#elseif( $attribute.isDoubleInput() )
+              DoubleFormField(
+                setState,
+                context,
+                _${attribute.name.toCamelCase()}Controller,
+                InputDecoration(
+                  labelText: '${attribute.getParam("label")}',
+                ),
+                (value) => null,
+              ),
+#elseif( $attribute.isBooleanInput() )
+              BooleanFormField(
+                setState,
+                context,
+                _${attribute.name.toCamelCase()}Controller,
+                InputDecoration(
+                  labelText: '${attribute.getParam("label")}',
+                ),
+                (value) => null,
+              ),
+#elseif( $attribute.isDateInput() || $attribute.isDateTimeInput() )
+              DateTimeFormField(
+                setState,
+                context,
+                _${attribute.name.toCamelCase()}Controller,
+                InputDecoration(
+                  labelText: '${attribute.getParam("label")}',
+                ),
+                (value) => null,
+              ),
+#elseif( $attribute.isEnumInput() )
+              EnumFormField(
+                setState,
+                context,
+                _${attribute.name.toCamelCase()}Controller,
+                InputDecoration(
+                  labelText: '${attribute.getParam("label")}',
+                ),
+                (value) => null,
+                appendItem(EnumValue(0, "", ""), ${attribute.type}.values),
+              ),
+#elseif( $attribute.isComposition() )
+              CompositionFormField(
+                setState,
+                context,
+                _${attribute.name.toCamelCase()}Controller,
+                InputDecoration(
+                  labelText: '${attribute.getParam("label")}',
+                ),
+                (context) => ${attribute.typeDomain.name.toPascalCase()}Form(${attribute.typeDomain.name.toPascalCase()}()),
+              ),
+#elseif( $attribute.isSelectEagerInput() )
+              SelectEagerFormField(
+                setState,
+                context,
+                _${attribute.name.toCamelCase()}Controller,
+                InputDecoration(
+                  labelText: '${attribute.getParam("label")}',
+                ),
+                (value) => null,
+                ${attribute.typeDomain.name}Repository.findAll(),
+              ),
+#elseif( $attribute.isSelectLazyInput() )
+              SelectLazyFormField(
+                setState,
+                context,
+                _${attribute.name.toCamelCase()}Controller,
+                InputDecoration(
+                  labelText: '${attribute.getParam("label")}',
+                ),
+                (value) => null,
+                (query) => ${attribute.typeDomain.name}Repository.findAllByQuery(query)
+              ),
+#elseif( $attribute.isSelectDropdownInput() )
+              SelectDropdownFormField(
+                setState,
+                context,
+                _${attribute.name.toCamelCase()}Controller,
+                InputDecoration(
+                  labelText: '${attribute.getParam("label")}',
+                ),
+                (value) => null,
+                ${attribute.typeDomain.name}Repository.findAll(),
+              ),
+#else
+              StringFormField(
+                setState,
+                context,
+                _${attribute.name.toCamelCase()}Controller,
+                InputDecoration(
+                  labelText: '${attribute.getParam("label")}',
+                ),
+                (value) => null,
+              ),
+#end
+#end
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+                width: double.infinity,
+                child: new RaisedButton(
+                  child: const Text('SALVAR'),
+                  color: Theme.of(context).primaryColor,
+                  onPressed: () {
+                    updateModel();
+                    Navigator.of(context).pop(_${domain.name.toCamelCase()});
+                  }
+                )
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  updateController() async {
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isListInput() )
+      var ${attribute.name.toCamelCase()} = await _${domain.name.toCamelCase()}.get${attribute.name.toPascalCase()}();
+      ${attribute.name.toCamelCase()}.forEach((item) => item.sel = true);
+#end
+#end
+      setState(() {
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isIntegerInput() )
+            _${attribute.name.toCamelCase()}Controller.text = intToStr(_${domain.name.toCamelCase()}.$attribute.name);
+#elseif( $attribute.isDoubleInput() )
+            _${attribute.name.toCamelCase()}Controller.text = doubleToStr(_${domain.name.toCamelCase()}.$attribute.name);
+#elseif( $attribute.isBooleanInput() )
+            _${attribute.name.toCamelCase()}Controller.text = boolToStr(_${domain.name.toCamelCase()}.$attribute.name);
+#elseif( $attribute.isDateInput() )
+            _${attribute.name.toCamelCase()}Controller.text = dateToStr(_${domain.name.toCamelCase()}.$attribute.name);
+#elseif( $attribute.isDateTimeInput() )
+            _${attribute.name.toCamelCase()}Controller.text = dateTimeToStr(_${domain.name.toCamelCase()}.$attribute.name);
+#elseif( $attribute.isEnumInput() )
+            _${attribute.name.toCamelCase()}Controller.text = _${domain.name.toCamelCase()}.$attribute.name;
+#elseif( $attribute.isListInput() )
+            _${attribute.name.toCamelCase()}Controller.models = ${attribute.name.toCamelCase()};
+#elseif( $attribute.isModelInput() )
+            _${attribute.name.toCamelCase()}Controller.model = _${domain.name.toCamelCase()}.$attribute.name;
+#else
+            _${attribute.name.toCamelCase()}Controller.text = _${domain.name.toCamelCase()}.$attribute.name;
+#end
+#end
+      });
+    }
+
+    updateModel() {
+      setState(() {
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isIntegerInput() )
+            _${domain.name.toCamelCase()}.$attribute.name = strToInt(_${attribute.name.toCamelCase()}Controller.text);
+#elseif( $attribute.isDoubleInput() )
+            _${domain.name.toCamelCase()}.$attribute.name = strToDouble(_${attribute.name.toCamelCase()}Controller.text);
+#elseif( $attribute.isBooleanInput() )
+            _${domain.name.toCamelCase()}.$attribute.name = strToBool(_${attribute.name.toCamelCase()}Controller.text);
+#elseif( $attribute.isDateInput() )
+            _${domain.name.toCamelCase()}.$attribute.name = strToDate(_${attribute.name.toCamelCase()}Controller.text);
+#elseif( $attribute.isDateTimeInput() )
+            _${domain.name.toCamelCase()}.$attribute.name = strToDateTime(_${attribute.name.toCamelCase()}Controller.text);
+#elseif( $attribute.isEnumInput() )
+            _${domain.name.toCamelCase()}.$attribute.name = _${attribute.name.toCamelCase()}Controller.text;
+#elseif( $attribute.isListInput() )
+            _${domain.name.toCamelCase()}.$attribute.name = _${attribute.name}Controller.models.map<${attribute.typeDomain.name}>((it) => it as ${attribute.typeDomain.name}).toList();
+#elseif( $attribute.isModelInput() )
+            _${domain.name.toCamelCase()}.$attribute.name = _${attribute.name.toCamelCase()}Controller.model;
+#else
+            _${domain.name.toCamelCase()}.$attribute.name = _${attribute.name.toCamelCase()}Controller.text;
+#end
+#end
+      });
+    }
+
+}

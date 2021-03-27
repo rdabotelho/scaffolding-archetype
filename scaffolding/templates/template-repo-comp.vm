@@ -1,0 +1,52 @@
+import 'package:${context.projectName.toLowerCase()}/repositories/base_repo.dart';
+import 'package:${context.projectName.toLowerCase()}/models/${domain.name.toSnakeLowerCase()}.dart';
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isList() )
+import 'package:${context.projectName.toLowerCase()}/models/${attribute.typeDomain.name.toSnakeLowerCase()}.dart';
+import 'package:${context.projectName.toLowerCase()}/models/${domain.name.toSnakeLowerCase()}_${attribute.typeDomain.name.toSnakeLowerCase()}.dart';
+import 'package:${context.projectName.toLowerCase()}/repositories/${domain.name.toSnakeLowerCase()}_${attribute.typeDomain.name.toSnakeLowerCase()}_repo.dart';
+#end
+#end
+
+class ${domain.name}Repository extends BaseRepository {
+
+    static Future<$domain.name> findOneBy${domain.compositionOwner.name}(int id${domain.compositionOwner.name}) {
+        return createDatabase().then((db) {
+            return db.rawQuery('select q.* from ${domain.name.toSnakeLowerCase()} q '
+                'where q.id_${domain.compositionOwner.name.toSnakeLowerCase()} = ?', [id${domain.compositionOwner.name}]).then((maps) {
+                for (Map<String, dynamic> map in maps) {
+                    return ${domain.name}.toModel(map);
+                }
+                return null;
+            });
+        });
+    }
+
+    static Future<List<$domain.name>> findAllBy${domain.compositionOwner.name}(int id${domain.compositionOwner.name}) {
+        if (id${domain.compositionOwner.name} == null) return Future.value([]);
+        return createDatabase().then((db) {
+            return db.rawQuery('select q.* from ${domain.name.toSnakeLowerCase()} q '
+                'where q.id_${domain.compositionOwner.name.toSnakeLowerCase()} = ?', [id${domain.compositionOwner.name}]).then((maps) {
+                final List<$domain.name> models = List();
+                for (Map<String, dynamic> map in maps) {
+                    models.add(${domain.name}.toModel(map));
+                }
+                return models;
+            });
+        });
+    }
+
+    static Future<int> save($domain.name model) {
+        return createDatabase().then((db) {
+            final Map<String, dynamic> map = ${domain.name}.toMap(model);
+            return db.insert('${domain.name.toSnakeLowerCase()}', map);
+        });
+    }
+
+    static Future<int> deleteAllBy${domain.compositionOwner.name}(int id${domain.compositionOwner.name}) {
+        return createDatabase().then((db) {
+            return db.delete('${domain.name.toSnakeLowerCase()}', where: 'id_${domain.compositionOwner.name.toSnakeLowerCase()} = ?', whereArgs: [id${domain.compositionOwner.name}]);
+        });
+    }
+
+}

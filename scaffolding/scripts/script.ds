@@ -1,0 +1,31 @@
+class Cliente (label: 'Cliente', attrTitle: 'nome', attrSubtitle: 'altura') {
+    String nome (label:'Nome', length:'100');
+    Integer altura (label:'Altura');
+    Double salario (label: 'Salário');
+    LocalDate dataNascimento (label: 'Data de Nascimento');
+    Boolean ativo (label: 'Ativo');
+    SexoEnum gender (label: 'Sexo');
+    Cidade cidade (label: 'Cidade', input: 'select-lazy');
+    List<Grupo> grupos (label: 'Grupos', manyToMany:'true', input: 'select-lazy');
+}
+
+enum SexoEnum {
+    MASCULINO (id:'1', name:'MASCULINO', description: 'Masculino');
+    FEMININO (id:'2', name:'FEMININO', description: 'Feminino');
+}
+
+class Cidade (label: 'Cidade', attrTitle: 'nome', attrSubtitle: 'uf', searches: ['nome','uf']) {
+    String nome (label:'Nome', length:'100');
+    String uf (label:'UF', length:'2');
+}
+
+class Grupo (label: 'Grupo', attrTitle: 'nome', attrSubtitle: 'descricao') {
+    String nome (label:'Nome', length:'100');
+    String descricao (label:'Descrição', length:'100');
+    List<Acesso> acessos (label:'Acessos', composition:'true');
+}
+
+class Acesso (label: 'Acesso', attrTitle: 'nome', attrSubtitle: 'descricao') {
+    String nome (label:'Nome', length:'100');
+    String descricao (label:'Descrição', length:'100');
+}

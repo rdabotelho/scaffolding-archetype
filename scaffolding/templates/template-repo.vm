@@ -1,0 +1,136 @@
+import 'package:${context.projectName.toLowerCase()}/repositories/base_repo.dart';
+import 'package:${context.projectName.toLowerCase()}/models/${domain.name.toSnakeLowerCase()}.dart';
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isList() && !$attribute.isComposition() )
+import 'package:${context.projectName.toLowerCase()}/models/${attribute.typeDomain.name.toSnakeLowerCase()}.dart';
+import 'package:${context.projectName.toLowerCase()}/models/${domain.name.toSnakeLowerCase()}_${attribute.typeDomain.name.toSnakeLowerCase()}.dart';
+import 'package:${context.projectName.toLowerCase()}/repositories/${domain.name.toSnakeLowerCase()}_${attribute.typeDomain.name.toSnakeLowerCase()}_repo.dart';
+#elseif( $attribute.isList() && $attribute.isComposition() )
+import 'package:${context.projectName.toLowerCase()}/models/${attribute.typeDomain.name.toSnakeLowerCase()}.dart';
+import 'package:${context.projectName.toLowerCase()}/repositories/${attribute.typeDomain.name.toSnakeLowerCase()}_repo.dart';
+#end
+#end
+
+class ${domain.name}Repository extends BaseRepository {
+
+    static Future<List<$domain.name>> findAll() {
+        return createDatabase().then((db) {
+            return db.query('${domain.name.toSnakeLowerCase()}').then((maps) {
+                final List<$domain.name> models = List();
+                for (Map<String, dynamic> map in maps) {
+                    models.add(${domain.name}.toModel(map));
+                }
+                return models;
+            });
+        });
+    }
+
+    static Future<List<$domain.name>> findAllByQuery(String query) {
+        return createDatabase().then((db) {
+            return db.query('${domain.name.toSnakeLowerCase()}',
+                where: ' #foreach( $search in ${domain.getSearches()} )#if( $foreach.count > 1 ) or#end $search like ?#end',
+                whereArgs: [#foreach( $search in ${domain.getSearches()} )#if( $foreach.count > 1),#end'%$query%'#end]).then((maps) {
+                final List<$domain.name> models = List();
+                for (Map<String, dynamic> map in maps) {
+                    models.add(${domain.name}.toModel(map));
+                }
+                return models;
+            });
+        });
+    }
+
+    static Future<$domain.name> findOne(int id) {
+        return createDatabase().then((db) {
+            return db.query('${domain.name.toSnakeLowerCase()}', where: 'id=?', whereArgs: [id]).then((maps) {
+                for (Map<String, dynamic> map in maps) {
+                    return ${domain.name}.toModel(map);
+                }
+                return null;
+            });
+        });
+    }
+
+    static Future<int> save(${domain.name} model) {
+        return createDatabase().then((db) async {
+            final Map<String, dynamic> map = ${domain.name}.toMap(model);
+            await db.insert('${domain.name.toSnakeLowerCase()}', map).then((id) => model.id = id);
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isList() )
+#if( $attribute.isComposition() )
+            if (model.${attribute.name} != null) {
+                for (${attribute.typeDomain.name} ${attribute.typeDomain.name.toCamelCase()} in model.${attribute.name}) {
+                    ${attribute.typeDomain.name.toCamelCase()}.id${domain.name} = model.id;
+                    await ${attribute.typeDomain.name}Repository.save(${attribute.typeDomain.name.toCamelCase()});
+                }
+            }
+#else
+            if (model.${attribute.name} != null) {
+                for (${attribute.typeDomain.name.toPascalCase()} ${attribute.typeDomain.name.toCamelCase()} in model.${attribute.name}) {
+                    ${domain.name}${attribute.typeDomain.name} ${domain.name.toCamelCase()}${attribute.typeDomain.name} = ${domain.name}${attribute.typeDomain.name}(id${domain.name}: model.id, id${attribute.typeDomain.name}: ${attribute.typeDomain.name.toCamelCase()}.id);
+                    await ${domain.name}${attribute.typeDomain.name}Repository.save(${domain.name.toCamelCase()}${attribute.typeDomain.name});
+                }
+            }
+#end
+#elseif( $attribute.isModel() && $attribute.isComposition() )
+            if (model.${attribute.name} != null) {
+                ${attribute.name}.id${domain.name} = model.id;
+                await ${attribute.typeDomain.name}Repository.save(model.${attribute.name});
+            }
+#end
+#end
+            return Future.value(model.id);
+        });
+    }
+
+    static Future<int> update(${domain.name} model) {
+        return createDatabase().then((db) async {
+            final Map<String, dynamic> map = ${domain.name}.toMap(model);
+            await db.update('${domain.name.toSnakeLowerCase()}', map, where: 'id=?', whereArgs: [model.id]);
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isList() )
+#if( $attribute.isComposition() )
+            if (model.${attribute.name} != null) {
+                await ${attribute.typeDomain.name}Repository.deleteAllBy${domain.name}(model.id);
+                for (${attribute.typeDomain.name.toPascalCase()} ${attribute.typeDomain.name.toCamelCase()} in model.${attribute.name}) {
+                    ${attribute.typeDomain.name.toCamelCase()}.id${domain.name} = model.id;
+                    await ${attribute.typeDomain.name}Repository.save(${attribute.typeDomain.name.toCamelCase()});
+                }
+            }
+#else
+            if (model.${attribute.name} != null) {
+                await ${domain.name}${attribute.typeDomain.name}Repository.deleteAllBy${domain.name}(model.id);
+                for (${attribute.typeDomain.name.toPascalCase()} ${attribute.typeDomain.name.toCamelCase()} in model.${attribute.name}) {
+                    ${domain.name}${attribute.typeDomain.name} ${domain.name.toCamelCase()}${attribute.typeDomain.name} = ${domain.name}${attribute.typeDomain.name}(id${domain.name}: model.id, id${attribute.typeDomain.name}: ${attribute.typeDomain.name.toCamelCase()}.id);
+                    await ${domain.name}${attribute.typeDomain.name}Repository.save(${domain.name.toCamelCase()}${attribute.typeDomain.name});
+                }
+            }
+#end
+#elseif( $attribute.isModel() && $attribute.isComposition() )
+            if (model.${attribute.name} != null) {
+                    ${attribute.typeDomain.name.toCamelCase()}.id${domain.name} = model.id;
+                    await ${attribute.typeDomain.name}Repository.save(${attribute.typeDomain.name.toCamelCase()});
+                }
+            }
+#end
+#end
+            return Future.value(model.id);
+        });
+    }
+
+    static Future<int> delete(int id) {
+        return createDatabase().then((db) async {
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isList() )
+#if( $attribute.isComposition() )
+            await ${attribute.typeDomain.name}Repository.deleteAllBy${domain.name}(id);
+#else
+            await ${domain.name}${attribute.typeDomain.name}Repository.deleteAllBy${domain.name}(id);
+#end
+#end
+#end
+            await db.delete('${domain.name.toSnakeLowerCase()}', where: 'id=?', whereArgs: [id]);
+            return Future.value(id);
+        });
+    }
+
+}

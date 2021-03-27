@@ -1,0 +1,48 @@
+#set( $domain1 = $domain.attributes[0] )
+#set( $domain2 = $domain.attributes[1] )
+import 'package:${context.projectName.toLowerCase()}/models/base_model.dart';
+
+class $domain.name extends BaseModel {
+
+    int id;
+    int id${domain1.name.toPascalCase()};
+    int id${domain2.name.toPascalCase()};
+
+    ${domain.name}({this.id${domain1.name.toPascalCase()}, this.id${domain2.name.toPascalCase()}});
+
+    static String createScript() {
+        return 'CREATE TABLE ${domain.name.toSnakeLowerCase()} '
+        '( '
+            '   id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL '
+            '   ,id_${domain1.name.toSnakeLowerCase()} INTEGER '
+            '   ,id_${domain2.name.toSnakeLowerCase()} INTEGER '
+            '   ,FOREIGN KEY(id_${domain1.name.toSnakeLowerCase()} ) REFERENCES ${domain1.name.toSnakeLowerCase()}(id) '
+            '   ,FOREIGN KEY(id_${domain2.name.toSnakeLowerCase()} ) REFERENCES ${domain2.name.toSnakeLowerCase()}(id) '
+        ') ';
+    }
+
+    static $domain.name toModel(Map<String, dynamic> map) {
+        final $domain.name model = ${domain.name}();
+        model.id = map['id'];
+        model.id${domain1.name.toPascalCase()} = map['id_${domain1.name.toSnakeLowerCase()}'];
+        model.id${domain2.name.toPascalCase()} = map['id_${domain2.name.toSnakeLowerCase()}'];
+        return model;
+    }
+
+    static Map<String, dynamic> toMap($domain.name model) {
+        final Map<String, dynamic> map = Map();
+        map['id'] = model.id;
+        map['id_${domain1.name.toSnakeLowerCase()}'] = model.id${domain1.name.toPascalCase()};
+        map['id_${domain2.name.toSnakeLowerCase()}'] = model.id${domain2.name.toPascalCase()};
+        return map;
+    }
+
+    int getId() {
+        return null;
+    }
+
+    String getLabel() {
+        return null;
+    }
+
+}

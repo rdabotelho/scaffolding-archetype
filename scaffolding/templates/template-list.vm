@@ -1,0 +1,111 @@
+import 'package:flutter/material.dart';
+import 'package:${context.projectName.toLowerCase()}/models/${domain.name.toSnakeLowerCase()}.dart';
+import 'package:${context.projectName.toLowerCase()}/repositories/${domain.name.toSnakeLowerCase()}_repo.dart';
+import 'package:${context.projectName.toLowerCase()}/views/${domain.name.toSnakeLowerCase()}/${domain.name.toSnakeLowerCase()}_form.dart';
+
+class ${domain.name}List extends StatefulWidget {
+
+    _${domain.name}ListState createState() => new _${domain.name}ListState();
+
+}
+
+class _${domain.name}ListState  extends State<${domain.name}List> {
+
+    @override
+    Widget build(BuildContext context) {
+        return Scaffold(
+            appBar: AppBar(
+                title: Text('${domain.getParam('label')}'),
+            ),
+            body: FutureBuilder(
+                future: ${domain.name}Repository.findAll(),
+                builder: (context, snapshot) {
+                    switch (snapshot.connectionState) {
+                        case ConnectionState.none:
+                            break;
+                        case ConnectionState.waiting:
+                            return Center(
+                                child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: <Widget>[
+                                        CircularProgressIndicator(),
+                                        Text('Loading'),
+                                    ],
+                                ),
+                            );
+                            break;
+                        case ConnectionState.active:
+                            break;
+                        case ConnectionState.done:
+                            final List<${domain.name}> list = snapshot.data;
+                            return ListView.builder(
+                                itemBuilder: (context, index) {
+                                    final ${domain.name} model = list[index];
+                                    return _${domain.name}Item(model, this.setState);
+                                },
+                                itemCount: list.length,
+                            );
+                            break;
+                    }
+                    return null;
+                },
+            ),
+            floatingActionButton: FloatingActionButton(
+                onPressed: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => ${domain.name}Form(${domain.name}()))
+                    )
+                    .then((${domain.name.toCamelCase()}) {
+                        if (${domain.name.toCamelCase()} == null) return;
+                        ${domain.name}Repository.save(${domain.name.toCamelCase()}).then((model) {
+                            this.setState(() => {});
+                        });
+                    });
+                },
+                child: Icon(Icons.add),
+                backgroundColor: Theme.of(context).primaryColor,
+            ),
+        );
+    }
+}
+
+class _${domain.name}Item extends StatelessWidget {
+
+    final ${domain.name} _model;
+    final setState;
+
+    _${domain.name}Item(this._model, this.setState);
+
+    @override
+    Widget build(BuildContext context) {
+        return Material(
+          child: InkWell(
+              onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => ${domain.name}Form(this._model))
+                    )
+                    .then((${domain.name.toCamelCase()}) {
+                        if (${domain.name.toCamelCase()} == null) return;
+                        ${domain.name}Repository.update(${domain.name.toCamelCase()}).then((model) {
+                            this.setState(() => {});
+                        });
+                    });
+              },
+              child: Card(
+                  child: ListTile(
+                      title: Text(
+                          _model.${domain.getParam('attrTitle').toString()}.toString(),
+                          style: TextStyle(fontSize: 24.0),
+                      ),
+                      subtitle: Text(
+                          _model.${domain.getParam('attrSubtitle').toString()}.toString(),
+                          style: TextStyle(fontSize: 16.0),
+                      ),
+                  ),
+              ),
+          ),
+        );
+    }
+
+}

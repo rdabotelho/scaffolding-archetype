@@ -1,0 +1,61 @@
+---
+projectName: "archetype"
+basePackage: "com.m2r.archetype"
+configDir: "${user.dir}/scaffolding"
+outputDir: "${user.dir}"
+createOneToManyClass: true
+templates:
+- name: "Config"
+  scope: "global"
+  fileName: "template-config.vm"
+  outputFileName: "lib/config/base_config.dart"
+  group: null
+  createIf: "true"
+- name: "Model"
+  scope: "class"
+  fileName: "template-model.vm"
+  outputFileName: "lib/models/${domain.name.toSnakeLowerCase()}.dart"
+  group: null
+  createIf: "true"
+- name: "ModelOtm"
+  scope: "oneToMany"
+  fileName: "template-model-otm.vm"
+  outputFileName: "lib/models/${domain.name.toSnakeLowerCase()}.dart"
+  group: null
+  createIf: "!$domain.hasCompositionOwner()"
+- name: "Enum"
+  scope: "enum"
+  fileName: "template-enum.vm"
+  outputFileName: "lib/enums/${domain.name.toSnakeLowerCase()}.dart"
+  group: null
+  createIf: "true"
+- name: "Repo"
+  scope: "class"
+  fileName: "template-repo.vm"
+  outputFileName: "lib/repositories/${domain.name.toSnakeLowerCase()}_repo.dart"
+  group: null
+  createIf: "!$domain.hasCompositionOwner()"
+- name: "RepoComp"
+  scope: "class"
+  fileName: "template-repo-comp.vm"
+  outputFileName: "lib/repositories/${domain.name.toSnakeLowerCase()}_repo.dart"
+  group: null
+  createIf: "$domain.hasCompositionOwner()"
+- name: "RepoOtm"
+  scope: "oneToMany"
+  fileName: "template-repo-otm.vm"
+  outputFileName: "lib/repositories/${domain.name.toSnakeLowerCase()}_repo.dart"
+  group: null
+  createIf: "true"
+- name: "FormList"
+  scope: "class"
+  fileName: "template-list.vm"
+  outputFileName: "lib/views/${domain.name.toSnakeLowerCase()}/${domain.name.toSnakeLowerCase()}_list.dart"
+  group: null
+  createIf: "!$domain.hasCompositionOwner()"
+- name: "Form"
+  scope: "class"
+  fileName: "template-form.vm"
+  outputFileName: "lib/views/${domain.name.toSnakeLowerCase()}/${domain.name.toSnakeLowerCase()}_form.dart"
+  group: null
+  createIf: "true"

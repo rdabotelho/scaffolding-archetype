@@ -1,0 +1,160 @@
+import 'package:${context.projectName.toLowerCase()}/models/base_model.dart';
+import 'package:${context.projectName.toLowerCase()}/utils/app_utils.dart';
+#if( $domain.hasCompositionOwner() )
+import 'package:${context.projectName.toLowerCase()}/models/${domain.compositionOwner.name.toSnakeLowerCase()}.dart';
+#end
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isList() )
+import 'package:${context.projectName.toLowerCase()}/models/${attribute.typeDomain.name.toSnakeLowerCase()}.dart';
+#if( $attribute.isComposition() )
+import 'package:${context.projectName.toLowerCase()}/repositories/${attribute.typeDomain.name.toSnakeLowerCase()}_repo.dart';
+#else
+import 'package:${context.projectName.toLowerCase()}/repositories/${domain.name.toSnakeLowerCase()}_${attribute.typeDomain.name.toSnakeLowerCase()}_repo.dart';
+#end
+#elseif( $attribute.isModel() )
+import 'package:${context.projectName.toLowerCase()}/models/${attribute.typeDomain.name.toSnakeLowerCase()}.dart';
+import 'package:${context.projectName.toLowerCase()}/repositories/${attribute.typeDomain.name.toSnakeLowerCase()}_repo.dart';
+#end
+#end
+
+class $domain.name extends BaseModel {
+
+    int id;
+#if( $domain.hasCompositionOwner() )
+    int id${domain.compositionOwner.name};
+#end
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isInteger() || $attribute.isLong() )
+    int $attribute.name;
+#elseif( $attribute.isFloat() || $attribute.isDouble() || $attribute.isBigDecimal() )
+    double $attribute.name;
+#elseif( $attribute.isBoolean() )
+    bool $attribute.name;
+#elseif( $attribute.isLocalDate() || $attribute.isLocalDateTime() )
+    DateTime $attribute.name;
+#elseif( $attribute.isEnum() )
+    String $attribute.name;
+#elseif( $attribute.isList() )
+    List<${attribute.typeDomain.name}> $attribute.name;
+#elseif( $attribute.isModel() )
+    $attribute.typeDomain.name $attribute.name;
+#else
+    String $attribute.name;
+#end
+#end
+
+    ${domain.name}({this.id});
+
+    static String createScript() {
+        return 'CREATE TABLE ${domain.name.toSnakeLowerCase()} '
+        '( '
+            '   id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL '
+#if( $domain.hasCompositionOwner() )
+            '   ,id_${domain.compositionOwner.name.toSnakeLowerCase()} INTEGER '
+#end
+#foreach( $attribute in $domain.attributes )
+#set( $column = "${attribute.name.toSnakeLowerCase()}" )
+#if( $attribute.isInteger() || $attribute.isLong() )
+            '   ,$column INTEGER '
+#elseif( $attribute.isFloat() || $attribute.isDouble() || $attribute.isBigDecimal() )
+            '   ,$column DOUBLE '
+#elseif( $attribute.isBoolean() )
+            '   ,$column INTEGER '
+#elseif( $attribute.isLocalDate() || $attribute.isLocalDateTime() )
+            '   ,$column DATETIME '
+#elseif( $attribute.isEnum() )
+            '   ,$column TEXT '
+#elseif( $attribute.isList() )
+#elseif( $attribute.isModel() )
+            '   ,${column}_id INTEGER '
+#else
+            '   ,$column TEXT '
+#end
+#end
+        ') ';
+    }
+
+    static $domain.name toModel(Map<String, dynamic> map) {
+        final $domain.name model = ${domain.name}();
+        model.id = map['id'];
+#if( $domain.hasCompositionOwner() )
+        model.id${domain.compositionOwner.name} = map['id_${domain.compositionOwner.name.toSnakeLowerCase()}'];
+#end
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isList() )
+        model.${attribute.name} = null; // lazy (use get${attribute.name.toPascalCase()})
+#elseif( $attribute.isBoolean() )
+        model.${attribute.name} = map['${attribute.name.toSnakeLowerCase()}'] == 1 ? true : false;
+#elseif( $attribute.isLocalDate() || $attribute.isLocalDateTime() )
+        model.${attribute.name} = strToDateTimeFormat(map['${attribute.name.toSnakeLowerCase()}'], 'yyyy-MM-dd HH:mm:ss');
+#elseif( $attribute.isModel() && $attribute.isComposition() )
+        ${attribute.typeDomain.name}Repository.findOneByCliente(map['id']).then((it) => model.${attribute.name} = it);
+#elseif( $attribute.isModel() )
+        ${attribute.typeDomain.name}Repository.findOne(map['${attribute.name.toSnakeLowerCase()}_id']).then((it) => model.${attribute.name} = it);
+#else
+        model.${attribute.name} = map['${attribute.name.toSnakeLowerCase()}'];
+#end
+#end
+        return model;
+    }
+
+    static Map<String, dynamic> toMap($domain.name model) {
+        final Map<String, dynamic> map = Map();
+        map['id'] = model.id;
+#if( $domain.hasCompositionOwner() )
+        map['id_${domain.compositionOwner.name.toSnakeLowerCase()}'] = model.id${domain.compositionOwner.name};
+#end
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isList() )
+#elseif( $attribute.isBoolean() )
+        map['${attribute.name.toSnakeLowerCase()}'] = model.$attribute.name ? 1 : 0;
+#elseif( $attribute.isLocalDate() || $attribute.isLocalDateTime() )
+        map['${attribute.name.toSnakeLowerCase()}'] = dateTimeToStrFormat(model.$attribute.name, 'yyyy-MM-dd HH:mm:ss');
+#elseif( $attribute.isModel() )
+        map['${attribute.name.toSnakeLowerCase()}_id'] = model != null ? model.${attribute.name}.id : null;
+#else
+        map['${attribute.name.toSnakeLowerCase()}'] = model.$attribute.name;
+#end
+#end
+        return map;
+    }
+
+#foreach( $attribute in $domain.attributes )
+#if( $attribute.isList() )
+#if( $attribute.isComposition() )
+    Future<List<${attribute.typeDomain.name}>> get${attribute.name.toPascalCase()}() async {
+        if (${attribute.name} == null) {
+            await ${attribute.typeDomain.name}Repository.findAllBy${domain.name}(id).then((list) => ${attribute.name} = list);
+        }
+        return ${attribute.name};
+    }
+
+#else
+    Future<List<${attribute.typeDomain.name}>> get${attribute.name.toPascalCase()}() async {
+        if (${attribute.name} == null) {
+            await ${domain.name}${attribute.typeDomain.name}Repository.findAll${attribute.typeDomain.name}By${domain.name}(id).then((list) => ${attribute.name} = list);
+        }
+        return ${attribute.name};
+    }
+
+#end
+#end
+#if( $attribute.isModel() && $attribute.isComposition() )
+    Future<List<${attribute.typeDomain.name}>> get${attribute.name.toPascalCase()}() async {
+        if (${attribute.name.toCamelCase()} == null) {
+            await ${attribute.typeDomain.name}Repository.findAllBy${domain.name}(id).then((list) => ${attribute.name.toCamelCase()} = list);
+        }
+        return ${attribute.name.toCamelCase()};
+    }
+
+#end
+#end
+    int getId() {
+        return id;
+    }
+
+    String getLabel() {
+        return $domain.getParam('attrTitle');
+    }
+
+}
