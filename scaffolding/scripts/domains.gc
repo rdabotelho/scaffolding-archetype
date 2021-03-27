@@ -1,7 +1,7 @@
 class People (label: 'People') {
     String name (label: 'Name');
     String nickname (label: 'Nickname');
-    List<Contact> contacts (label: Contact List');
+    List<Contact> contacts (label: 'Contact List');
 }
 
 class Contact (label: 'Contact') {
