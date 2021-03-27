@@ -2,7 +2,7 @@ import 'package:${context.projectName.toLowerCase()}/enums/base_enum.dart';
 
 class $domain.name {
 #foreach( $attribute in $domain.attributes )
-  static EnumValue $attribute.name = EnumValue($attribute.getParam('id').toString(), "${attribute.getParam('name').toString()}", "${attribute.getParam('description').toString()}");
+  static EnumValue $attribute.name = EnumValue($attribute.getParam('id').toString(), "${attribute.name}", "${attribute.getParam('description').toString()}");
 #end
   static List<EnumValue> values = [#foreach( $attribute in $domain.attributes )${attribute.name}${attribute.ifLast('',',')}#end];
 }

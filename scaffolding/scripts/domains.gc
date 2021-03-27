@@ -1,12 +1,12 @@
-class People (label: 'People') {
+class People (label: 'People', attrTitle: 'name', attrSubtitle: 'nickname') {
     String name (label: 'Name');
     String nickname (label: 'Nickname');
     List<Contact> contacts (label: 'Contact List');
 }
 
-class Contact (label: 'Contact') {
-    ContactTypeEnum type;
-    String value;
+class Contact (label: 'Contact', attrTitle: 'value', attrSubtitle: 'type') {
+    ContactTypeEnum type (label: 'Type');
+    String value (label: 'Value');
 }
 
 enum ContactTypeEnum {

@@ -16,20 +16,6 @@ void execInitialScripts(Database db) {
   db.execute(${domain.name}.createScript());
 #end
 #end
-  db.execute("INSERT INTO cidade(nome,uf) VALUES('BELEM','PA')");
-  db.execute("INSERT INTO cidade(nome,uf) VALUES('CASTANHAL','PA')");
-  db.execute("INSERT INTO cidade(nome,uf) VALUES('ANANINDEUA','PA')");
-  db.execute("INSERT INTO cidade(nome,uf) VALUES('SAO PAULO','SP')");
-  db.execute("INSERT INTO cidade(nome,uf) VALUES('CAMPINAS','SP')");
-  db.execute("INSERT INTO cidade(nome,uf) VALUES('BARUERI','SP')");
-  db.execute("INSERT INTO cidade(nome,uf) VALUES('FORTALEZA','CE')");
-  db.execute("INSERT INTO cidade(nome,uf) VALUES('BRASILIA','DF')");
-  db.execute("INSERT INTO cidade(nome,uf) VALUES('CURITIBA','PA')");
-  db.execute("INSERT INTO grupo(nome,descricao) VALUES('GRUPO A','Grupo de Acesso A')");
-  db.execute("INSERT INTO grupo(nome,descricao) VALUES('GRUPO B','Grupo de Acesso B')");
-  db.execute("INSERT INTO grupo(nome,descricao) VALUES('GRUPO C','Grupo de Acesso C')");
-  db.execute("INSERT INTO grupo(nome,descricao) VALUES('GRUPO D','Grupo de Acesso D')");
-  db.execute("INSERT INTO grupo(nome,descricao) VALUES('GRUPO E','Grupo de Acesso E')");
 }
 
 List<Widget> getMenu(BuildContext context) {
