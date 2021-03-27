@@ -2,7 +2,7 @@
 //  Generated file. Do not edit.
 //
 
-#import "GeneratedPluginRegistrant.h"
+\#import "GeneratedPluginRegistrant.h"
 
 @implementation GeneratedPluginRegistrant
 
